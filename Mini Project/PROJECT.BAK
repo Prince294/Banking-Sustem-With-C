@@ -1,0 +1,1028 @@
+#include <stdio.h>
+#include <conio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define BKSP 8
+#define ENTER 13
+#define TAB 9
+#define SPACE 32
+
+void Login();
+void Home();
+void Register();
+void Pay();
+void Wallet(int);
+void Statement();
+void Reset();
+void Bank();
+
+
+
+FILE *info,*info1,*info2,*update;
+
+
+
+
+struct Detail
+{
+	char Name[30],Pass[30];
+	int ID;
+}inf;
+
+
+int main()
+{
+	int a;
+	system("cls");
+	printf("****Welcome to The Online Bill Payment Service****\n\n");
+	printf("Press 1 for Login\nPress 2 for New Registration\n\n");
+	scanf("%d",&a);
+	switch(a)
+	{
+		case 1 : Login();
+					break;
+		case 2 : Register();
+					break;
+		default: system("cls");
+					printf("Sorry you choose wrong Option\n\nPress any key to continue...\n");
+					getch();
+					main();
+	}
+	return 0;
+}
+
+void Login()
+{
+	char name[30],pass[30],txt[5]=".txt",ID[20],path[50];
+	int i=0,ch,Id;
+	system("cls");
+	printf("Enter the ID Number of the User\n");
+	
+	scanf("%d",&Id);
+	sprintf(ID,"%d",Id);
+	strcat(ID, txt);
+	strcpy(path,"C:/Mini Project/Login");
+
+	if((info=fopen(strcat(path,ID), "r"))==NULL)
+	{
+		system("cls");
+		printf("\nSorry Username not Found\n");
+		printf("Enter any key to ReEnter Username\n");
+		getch();
+		Login();
+	}
+	inf.ID=Id;
+	while(fscanf(info,"\n%s %s\n", inf.Pass,inf.Name)!=EOF)
+	{
+		Pass:
+		system("cls");
+		printf("Hello %s\n",inf.Name);
+		printf("\nPlease Enter the Password\n");
+		i=0;
+		while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			pass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			pass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+		if(strcmp(pass,inf.Pass)==0)
+		{
+			Home();
+		}
+		else
+		{
+			system("cls");
+			printf("You Entered Wrong Password\n");
+			printf("\nPress any key to continue...");
+			getch();
+			goto Pass;
+		}
+	}
+}
+
+//*******************REGISTER*******************
+
+void Register()
+{
+	char name[20],pass[30],pass1[30],ch,txt[10]=".txt",copy[20],path[50];
+	int Id,i=0,day,month,year,bal=0;
+	time_t now;
+	struct tm *local = localtime(&now);
+	system("cls");
+	printf("Welcome To The Registration Page\n\n");
+	printf("Enter The Name of the User\n");
+	scanf("%s",name);
+	printf("\nEnter The Login Password\n");
+	while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			pass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			pass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+	i=0;
+	printf("\nEnter The Login Password Again\n");
+	while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			pass1[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			pass1[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+	if(strcmp(pass,pass1)==0)
+	{
+		system("cls");
+		printf("\nThanks for Registring\n\n");
+		printf("Press any key to get Your Login ID Number\n");
+		getch();
+
+		I:
+		Id=(rand() % 99999);
+		system("cls");
+		if(Id<10000)
+		{
+			goto I;
+		}
+
+		sprintf(copy,"%d",Id);
+		strcat(copy,txt);
+
+		if((info=(fopen(copy,"r")))!=NULL)
+		{
+			goto I;
+		}
+		printf("%d\n",Id);
+	}
+	else
+	{
+		printf("Sorry, Password is Mismatched\n");
+		printf("Press any key to Continue...\n");
+		getch();
+		Register();
+	}
+	strcpy(path,"C:/Mini Project/Login");
+
+
+	time(&now);
+
+	day = local->tm_mday;
+	month = local->tm_mon + 1;
+	year = local->tm_year + 1900;
+
+
+	info=(fopen(strcat(path,copy), "w"));//login
+	fprintf(info,"\n%s %s %02d %02d %d\n",pass,name,day,month,year);
+	fclose(info);
+
+	strcpy(path,"C:/Mini Project/Home");
+	info1=(fopen(strcat(path,copy), "w"));//home
+	fprintf(info1,"\n%s %02d %02d %d %d\n",name,day,month,year,bal);
+	fclose(info1);
+	printf("\n\nPress any key to Login\n");
+	getch();
+	Login();
+}
+
+
+void Home()
+{
+	int Bal,opt,ID=inf.ID,day,month,year,i=1;
+	char ch,path[50],txt[10]=".txt",Id[30],name[30],pass[20];
+	char wall_pass[20],wall_name[20],wall_bal;
+	int amt;
+	system("cls");
+	printf("1 Month = Rs.723\n\n");
+
+	strcpy(path,"C:/Mini Project/Home/");
+	sprintf(Id,"%d",ID);
+	strcat(Id,txt);
+
+	info=fopen(strcat(path,Id), "r");//Home
+	strcpy(path,"C:/Mini Project/Wallet/");
+	info1=fopen(strcat(path,Id), "r");
+	if(info1==NULL)
+	{
+		system("cls");
+		printf("You Have to Update Your Wallet First\n");
+		printf("Press any Key to Continue\n");
+		getch();
+		Wallet(1);
+	}
+	while(fscanf(info,"\n%s %02d %02d %d %d\n", name,&day,&month,&year,&Bal)!=EOF)
+	{
+		printf("%d\nBalance Left\n\n\n",Bal);
+		if(Bal!=0)
+		{
+			printf("Press %d for PAY\n",i);
+			i++;
+		}
+		printf("Press %d for Wallet\n",i++);
+		printf("Press %d for Statement\n",i++);
+		printf("Press %d for Reseting Account Password or Name\n\n",i++);
+		scanf("%d",&opt);
+		if(Bal!=0)
+		{
+			switch(opt)
+			{
+				case 1 : break;
+				case 2 : Wallet(2);
+							break;
+				case 3 : Statement();
+							break;
+				case 4 : Reset();
+							break;
+				default : system("cls");
+				printf("Wrong Choice\nPress any Key to Continue");
+				getch();
+				Home();
+			}
+		}
+		else
+		{
+			switch(opt)
+			{
+				case 1 : Wallet(2);
+							break;
+				case 2 : Statement();
+							break;
+				case 3 : Reset();
+							break;
+				default : system("cls");
+				printf("Wrong Choice\nPress any Key to Continue");
+				getch();
+				Home();
+			}
+		}
+
+//********************PAY**********************
+
+
+		while(fscanf(info1,"\n%d %s %s\n", &wall_bal,wall_pass,wall_name)!=EOF)
+		{
+			if(opt==1 && Bal!=0)
+			{
+
+				system("cls");
+				printf("%d Wallet Balance Left\n\n",wall_bal);
+				printf("%d Balance Left\n",Bal);
+				printf("\nEnter the Amount\n");
+				scanf("%d",&amt);
+				if(wall_bal<amt)
+				{
+					int opt;
+					system("cls");
+					A:
+					printf("Low Wallet Balance\nFirstly Add money to wallet\n");
+					printf("Press 1 for back\n");
+					printf("Press 2 for Redirecting to Bank\n");
+					scanf("%d",&opt);
+					if(opt==1)
+					{
+						Home();
+					}
+					else if(opt==2)
+					{
+						Bank();
+					}
+					else
+					{
+						printf("\nWrong Choice\nPress any Key to Continue\n");
+						getch();
+						goto A;
+					}
+				}//wall_bal<amt If ends
+				else
+				{
+					B:
+					i=0;
+					system("cls");
+					printf("Enter Your Wallet Password\n");
+	while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			pass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			pass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+					if(strcpy(wall_pass,pass)==0)
+					{
+						system("cls");
+						printf("Your Transaction is successfully done\n");
+					}
+					else
+					{
+						printf("You Entered Wrong Password\n");
+						printf("Press any Key To Continue\n");
+						getch();
+						goto B;
+					}
+
+					strcpy(path,"C:/Mini Project/Wallet/update.txt");
+					update=fopen(path,"w");//update.txt
+					strcpy(path,"C:/Mini Project/Wallet/");
+
+					while(fscanf(info1,"\n%d %s %s\n", &wall_bal,wall_pass,wall_name)!=EOF)
+					{
+					fprintf(update,"\n%d %s %s\n", wall_bal,wall_pass,wall_name);
+				}
+				fclose(info);
+				fclose(info1);
+				fclose(update);
+				strcpy(path,"C:/Mini Project/Wallet/");
+				info1=fopen(strcat(path,Id), "w");
+				strcpy(path,"C:/Mini Project/Wallet/update.txt");
+				update=fopen(path, "r");
+
+				while(fscanf(update,"\n%d %s %s\n", &wall_bal,wall_pass,wall_name)!=EOF)
+					{
+						wall_bal=wall_bal-amt;
+					fprintf(info1,"\n%d %s %s\n",wall_bal,wall_pass,wall_name);
+				}
+
+					fprintf(info,"\n%d %s %s\n",wall_bal,wall_pass,wall_name);
+				}
+
+			}//opt==1 if ends
+		}//while Ends
+	}//parent while ends
+}
+
+
+//******************WALLET*********************
+
+void Wallet(int opt)
+{
+	char wall_name[30],wall_pass[30],wall_pass1[30],ch,ch1,path[20],txt[10]=".txt",ID[20];
+	int i=0,Id=inf.ID,wall_bal=0,opt1;
+	system("cls");
+
+	if(opt==1)
+	{
+		strcpy(path,"C:/Mini Project/Wallet/");
+		sprintf(ID,"%d",Id);
+		strcat(ID,txt);
+		info=fopen(strcat(path,ID), "w");
+		printf("Enter The Name of your Wallet\n");
+		scanf("%s",wall_name);
+		printf("\nEnter The Password of your Wallet\n");
+		while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			wall_pass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			wall_pass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+		i=0;
+		printf("\nEnter The Password of your Wallet Again\n");
+		while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			wall_pass1[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			wall_pass1[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+		if(strcmp(wall_pass,wall_pass1)==0)
+		{
+			fprintf(info,"\n%d %s %s\n",wall_bal,wall_pass,wall_name);
+			system("cls");
+			printf("\nThanks for Registring\n\n");
+			printf("Press any key to get back Home\n");
+			fclose(info);
+			getch();
+			Home();
+		}
+	}
+	else if(opt==2)
+	{
+		char wall_upass[30],wall_upass1[30];
+		system("cls");
+		strcpy(path,"C:/Mini Project/Wallet/");
+		sprintf(ID,"%d",Id);
+		strcat(ID,txt);
+		info=fopen(strcat(path,ID), "r");
+
+		while(fscanf(info,"\n%d %s %s\n",&wall_bal,wall_pass,wall_name)!=EOF)
+		{
+			printf("Welcome to the Wallet %s\n\n",wall_name);
+			printf("Enter The Password Of your Wallet\n");
+			while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			wall_upass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			wall_upass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+			if(strcmp(wall_upass,wall_pass)!=0)
+			{
+				system("cls");
+				printf("You Entered Wrong Password\n");
+				printf("Press any Key to Continue\n");
+				getch();
+				Wallet(2);
+			}
+			system("cls");
+
+			printf("Welcome to the Wallet %s\n\n",wall_name);
+			printf("Your Wallet Balance Is: Rs. %d\n\n\n",wall_bal);
+			printf("Press 1 to Add Money to the Wallet\n");
+			printf("Press 2 to reset your Password\n");
+			printf("Press 3 for Back\n");
+			scanf("%d",&opt1);
+			if(opt1==1)
+			{
+				Bank();
+			}
+			else if(opt1==2)
+			{
+				system("cls");
+				i=0;
+				printf("\nEnter The Password of your Wallet\n");
+	while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			wall_upass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			wall_upass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+				i=0;
+				printf("\nEnter The Password of your Wallet Again\n");
+	while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			wall_upass1[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			wall_upass1[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+				if(strcmp(wall_upass,wall_upass1)==0)
+				{
+					strcpy(path,"C:/Mini Project/Wallet/update.txt");
+					update=fopen(path,"w");
+
+					fprintf(update,"\n%d %s %s\n",wall_bal,wall_upass,wall_name);
+
+					fclose(update);
+					fclose(info);
+
+					strcpy(path,"C:/Mini Project/Wallet/");
+					info=fopen(strcat(path,ID),"w");
+
+					strcpy(path,"C:/Mini Project/Wallet/update.txt");
+					update=fopen(path,"r");
+
+					while(fscanf(update,"\n%d %s %s\n",&wall_bal,wall_pass,wall_name)!=EOF)
+					{
+						fprintf(info,"\n%d %s %s\n",wall_bal,wall_pass,wall_name);
+					}
+					fclose(info);
+					fclose(update);
+
+					system("cls");
+					printf("Your Password is Successfully Changed\n");
+					printf("Press any key to Back to the Home\n");
+					getch();
+					Home();
+				}
+			}//opt1==2 else if ends
+			else if(opt1==3)
+			{
+				Home();
+			}
+		}//while ends
+
+	}//main else if opt==2 ends
+
+}
+
+void Statement()
+{
+	system("cls");
+	printf("statement");
+}
+
+void Reset()
+{
+	system("cls");
+	printf("Reset");
+}
+
+//********************BANK**********************
+
+void Bank()
+{
+	int i=0,balance=90000,amt,wall_ball,chk=0,IDD=inf.ID;
+	unsigned long long acc_no,ID;
+	char Id[30],txt[6]=".txt",path[40],ch,ch1,pass[20],pass1[20],name[20],ifsc[20],npass[20],npass1[20],wall_pas[20],wall_nam[20],Ifsc[20],Name[20],Pass[20],Idd[30];
+
+	sprintf(Idd,"%llu",IDD);
+	strcat(Idd,txt);
+
+	Detail:
+	system("cls");
+		printf("Welcome to the Online Banking\n\n");
+	printf("Please Enter The Account Number\n");
+	scanf("%llu",&ID);
+
+	Regist:
+	strcpy(path,"C:/Mini Project/Bank/");
+	sprintf(Id,"%llu",ID);
+	strcat(Id,txt);
+
+	if((info=fopen(strcat(path,Id),"r"))!=NULL)
+	{
+		int opt,opt1;
+		while((fscanf(info,"\n%s %s %s %d\n",ifsc,pass,name,&balance))!=EOF)
+		{
+			if(chk==0)
+			{
+				printf("\nPlease Enter IFSC Code\n");
+				scanf("%s",Ifsc);
+				printf("\nPlease Enter Name\n");
+				scanf("%s",Name);
+				Password:
+				if((strcmp(Ifsc,ifsc))==0 && (strcmp(name,Name))==0)
+				{
+					system("cls");
+					printf("Please Enter Password\n");
+
+					i=0;
+	while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			Pass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			Pass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+					if((strcmp(pass,Pass))!=0)
+					{
+						printf("You Entered Wrong 	Password\n");
+						printf("Press any Key to Continue\n");
+						getch();
+						goto Password;
+					}
+				}
+				else
+				{
+					printf("You Entered Wrong Detail\n");
+					printf("Press any Key to Continue\n");
+					getch();
+					goto Detail;
+				}
+			}
+
+			system("cls");
+			printf("Hello %s\nWelcome to the Online Banking\n\n",name);
+			printf("Press 1 to Add Money in Your Wallet\n");
+			printf("Press 2 to Check Your Account Balance\n");
+			printf("Press 3 to Reset Your Password\n");
+			scanf("%d",&opt);
+			printf("Press 4 to get Back\n");
+
+			if(opt==1)
+			{
+				system("cls");
+				printf("Hello %s\nWelcome to the Only Banking\n\n",name);
+				printf("Enter The Amount\n");
+				scanf("%d",&amt);
+				if(amt<=balance)
+				{
+					system("cls");
+					printf("Your Transection Is Successfully Proceed\n");
+					printf("\nPress any Key to Continue\n");
+					getch();
+					balance-=amt;
+
+					strcpy(path,"C:/Mini Project/Bank/update.txt");
+					update=fopen(path,"w");
+					fprintf(update,"\n%s %s %s %d\n",ifsc,pass,name,balance);
+					fclose(update);
+					fclose(info);
+					update=fopen(path,"r");
+					strcpy(path,"C:/Mini Project/Bank/");
+					info=fopen(strcat(path,Id),"w");
+					while((fscanf(update,"\n%s %s %s %d\n",ifsc,pass,name,&balance))!=EOF)
+					{
+						fprintf(info,"\n%s %s %s %d\n",ifsc,pass,name,balance);
+					}
+					fclose(update);
+					fclose(info);
+
+
+					strcpy(path,"C:/Mini Project/Wallet/");
+					info1=fopen(strcat(path,Idd),"r");
+
+
+					strcpy(path,"C:/Mini Project/Wallet/update.txt");
+					update=fopen(path,"w");
+
+					while((fscanf(info1,"\n%d %s %s\n",&wall_ball,wall_pas,wall_nam))!=EOF)
+					{
+						fprintf(update,"\n%d %s %s\n",wall_ball+amt,wall_pas,wall_nam);
+
+					}
+
+					fclose(update);
+					fclose(info1);
+
+					strcpy(path,"C:/Mini Project/Wallet/");
+					info1=fopen(strcat(path,Idd),"w");
+
+					strcpy(path,"C:/Mini Project/Wallet/update.txt");
+					update=fopen(path,"r");
+
+					while((fscanf(update,"\n%d %s %s\n",&wall_ball,wall_pas,wall_nam))!=EOF)
+					{
+						fprintf(info1,"\n%d %s %s\n",wall_ball,wall_pas,wall_nam);
+					}
+					fclose(info1);
+					fclose(update);
+
+					Wallet(2);
+
+				}
+				else
+				{
+					system("cls");
+					printf("Low Balance!\n\n");
+					printf("Press any Key to Back\n");
+					getch();
+					Bank();
+				}
+			}
+			else if(opt==2)
+			{
+				system("cls");
+				printf("Hello %s\nWelcome to the Only Banking\n\n",name);
+				printf("Your Account Balance Is: Rs. %d",balance);
+
+				printf("\n\nPress any Key to Continue\n");
+				getch();
+				Bank();
+
+			}
+			else if(opt==3)
+			{
+				char ch,ch1;
+				Passwo:
+				system("cls");
+				printf("Enter the Old Password\n");
+				i=0;
+				while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			pass1[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			pass1[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+				i=0;
+				if(strcmp(pass,pass1)==0)
+				{
+					system("cls");
+					printf("Enter The New Password\n");
+	while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			npass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			npass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+					i=0;
+
+					printf("\nEnter The New Password Again\n");
+	while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			npass1[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			npass1[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+					if(strcmp(npass,npass1)==0)
+					{
+						system("cls");
+						printf("Successfully Changed the Password\n");
+
+
+						strcpy(path,"C:/Mini Project/Bank/update.txt");
+						update=fopen(path,"w");
+						fprintf(update,"\n%s %s %s %d\n",ifsc,npass,name,balance);
+						fclose(update);
+						fclose(info);
+						update=fopen(path,"r");
+						strcpy(path,"C:/Mini Project/Bank/");
+						info=fopen(strcat(path,Id),"w");
+						while((fscanf(update,"\n%s %s %s %d\n",ifsc,pass,name,&balance))!=EOF)
+						{
+							fprintf(info,"\n%s %s %s %d\n",ifsc,pass,name,balance);
+						}
+						fclose(update);
+						fclose(info);
+						printf("\nPress any Key to Continue\n");
+						getch();
+						Bank();
+					}
+
+				}
+				else
+				{
+					printf("You Entered Wrong Password\n");
+					printf("Press any Key to Continue\n");
+					getch();
+					goto Passwo;
+				}
+			}
+			else if(opt==4)
+			{
+				Wallet(2);
+			}
+			else
+			{
+				printf("\nwWrong Choice\n");
+							printf("Press any Key to Continue\n");
+							getch();
+							Bank();
+			}
+
+
+
+		}
+	}
+	else
+	{
+		printf("\nregister Please Enter IFSC Code\n");
+		scanf("%s",Ifsc);
+		printf("\nPlease Enter Name\n");
+		scanf("%s",Name);
+		system("cls");
+		printf("\nPlease Enter Password\n");
+		while(1)
+	{
+		ch=getch();
+		if(ch==ENTER)
+		{
+			Pass[i]='\0';
+			break;
+		}
+		else if(ch==BKSP)
+		{
+			printf("\b \b");
+			i--;
+		}
+		else if(ch==TAB || ch==SPACE)
+		{
+			continue;
+		}
+		else
+		{
+			Pass[i]=ch;
+			printf("%c",ch);		delay(10500);			printf("\b*");
+			i++;
+		}
+	}
+
+		info1=fopen(path,"w");
+		fprintf(info1,"\n%s %s %s %d\n",Ifsc,Pass,Name,balance);
+		fclose(info1);
+		chk=2;
+		goto Regist;
+
+	}
+
+}
+
+/*
+void Statement()
+{
+
+}
+*/
